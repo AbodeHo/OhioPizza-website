@@ -984,22 +984,52 @@ h1, h2, h3 {
    ============================================ */
 .floating-item {
     position: absolute;
-    width: clamp(55px, 9vw, 110px);
-    height: auto;
-    opacity: 0.08;
-    filter: brightness(0.75);
-    animation: floatAround infinite ease-in-out;
-    will-change: transform;
+    width: 30px;
+    height: 30px;
+    max-width: 30px;
+    max-height: 30px;
+    object-fit: contain;
+    pointer-events: none;
+    animation: floatVeg var(--duration) ease-in-out infinite;
+    animation-delay: var(--delay);
+    will-change: transform, opacity;
+    --tx: 18px;
+    --ty: -28px;
 }
 
-.floating-item.mushroom { width: clamp(45px, 7.5vw, 95px); }
-.floating-item.pepper { width: clamp(65px, 10vw, 125px); }
+@keyframes floatVeg {
+    0% {
+        transform: translate3d(0, 0, 0) scale(var(--scale)) rotate(var(--rotate));
+        opacity: var(--opacity-low);
+    }
+    50% {
+        transform: translate3d(var(--tx), var(--ty), 0) scale(var(--scale)) rotate(var(--rotate-mid));
+        opacity: var(--opacity-high);
+    }
+    100% {
+        transform: translate3d(0, 0, 0) scale(var(--scale)) rotate(var(--rotate));
+        opacity: var(--opacity-low);
+    }
+}
 
-@keyframes floatAround {
-    0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
-    33%  { transform: translate(28px, 45px) rotate(10deg) scale(1.04); }
-    66%  { transform: translate(-18px, 90px) rotate(-5deg) scale(0.96); }
-    100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+#floatingBg.anim-paused .floating-item {
+    animation-play-state: paused;
+}
+
+@media (max-width: 768px) {
+    .floating-item {
+        width: 18px;
+        height: 18px;
+        max-width: 18px;
+        max-height: 18px;
+        animation-duration: calc(var(--duration) * 1.6);
+        --tx: 8px;
+        --ty: -12px;
+    }
+
+    #floatingBg {
+        opacity: 0.6;
+    }
 }
 
 /* ============================================

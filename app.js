@@ -416,39 +416,62 @@ function init() {
 }
 
 /**
- * Dynamically generate high-density floating background elements
+ * Dynamically generate 50 mushroom + 50 pepper floating background elements.
+ * Animation driven entirely by CSS keyframes (transform + opacity only).
+ * IntersectionObserver pauses animation when the section is off-screen.
  */
 function setupFloatingBackground() {
   const container = document.getElementById('floatingBg');
   if (!container) return;
 
-  const isMobileDevice = window.matchMedia('(max-width: 768px)').matches;
-  const count = isMobileDevice ? 0 : 15;
-  if (count === 0) return;
-  const fragments = document.createDocumentFragment();
+  const COUNT_EACH = 50; // 50 mushrooms + 50 peppers = 100 total
+  const fragment = document.createDocumentFragment();
 
-  for (let i = 0; i < count; i++) {
-    const item = document.createElement('img');
-    const isMushroom = Math.random() > 0.5;
+  function createFloatingItem(type) {
+    const img = document.createElement('img');
+    img.src = `images/bg/${type}.png`;
+    img.className = `floating-item ${type}`;
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
 
-    item.src = isMushroom ? 'images/bg/mushroom.png' : 'images/bg/pepper.png';
-    item.className = `floating-item ${isMushroom ? 'mushroom' : 'pepper'}`;
+    const top      = Math.random() * 100;
+    const left     = Math.random() * 100;
+    const duration = 18 + Math.random() * 22;          // 18s–40s
+    const delay    = -(Math.random() * 35);             // start mid-animation
+    const scale    = 0.6 + Math.random() * 0.8;        // 0.6–1.4
+    const rotate   = Math.round(Math.random() * 60 - 30);       // -30° to 30°
+    const rotateMid = rotate + Math.round(Math.random() * 20 - 10);
+    const opacityLow  = 0.04 + Math.random() * 0.08;            // 0.04–0.12
+    const opacityHigh = opacityLow + 0.05 + Math.random() * 0.10; // +0.05–0.15
 
-    // Randomize positioning
-    const top = Math.random() * 100;
-    const left = Math.random() * 100;
-    const delay = Math.random() * -20; // Negative delay so they start at different states
-    const duration = 15 + Math.random() * 20; // 15s to 35s
+    img.style.top  = `${top.toFixed(2)}%`;
+    img.style.left = `${left.toFixed(2)}%`;
+    img.style.setProperty('--duration',     `${duration.toFixed(1)}s`);
+    img.style.setProperty('--delay',        `${delay.toFixed(1)}s`);
+    img.style.setProperty('--scale',        scale.toFixed(2));
+    img.style.setProperty('--rotate',       `${rotate}deg`);
+    img.style.setProperty('--rotate-mid',   `${rotateMid}deg`);
+    img.style.setProperty('--opacity-low',  opacityLow.toFixed(3));
+    img.style.setProperty('--opacity-high', opacityHigh.toFixed(3));
 
-    item.style.top = `${top}%`;
-    item.style.left = `${left}%`;
-    item.style.animationDelay = `${delay}s`;
-    item.style.animationDuration = `${duration}s`;
-
-    fragments.appendChild(item);
+    return img;
   }
 
-  container.appendChild(fragments);
+  for (let i = 0; i < COUNT_EACH; i++) {
+    fragment.appendChild(createFloatingItem('mushroom'));
+    fragment.appendChild(createFloatingItem('pepper'));
+  }
+
+  container.appendChild(fragment);
+
+  // Pause CSS animations while the menu section is scrolled off-screen
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        container.classList.toggle('anim-paused', !entry.isIntersecting);
+      });
+    }, { threshold: 0 }).observe(container.parentElement || container);
+  }
 }
 
 
