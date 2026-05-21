@@ -399,7 +399,13 @@ h1, h2, h3 {
     inset: 0;
     pointer-events: none;
     overflow: hidden;
-    z-index: -1;
+    z-index: 0;
+}
+
+/* Keep menu content above the floating layer */
+.menu-section > .container {
+    position: relative;
+    z-index: 1;
 }
 
 /* Filter Tabs */
@@ -990,25 +996,28 @@ h1, h2, h3 {
     max-height: 30px;
     object-fit: contain;
     pointer-events: none;
+    display: block;
+    visibility: visible;
     animation: floatVeg var(--duration) ease-in-out infinite;
     animation-delay: var(--delay);
     will-change: transform, opacity;
     --tx: 18px;
     --ty: -28px;
+    --opacity-multiplier: 1;
 }
 
 @keyframes floatVeg {
     0% {
         transform: translate3d(0, 0, 0) scale(var(--scale)) rotate(var(--rotate));
-        opacity: var(--opacity-low);
+        opacity: calc(var(--opacity-low) * var(--opacity-multiplier));
     }
     50% {
         transform: translate3d(var(--tx), var(--ty), 0) scale(var(--scale)) rotate(var(--rotate-mid));
-        opacity: var(--opacity-high);
+        opacity: calc(var(--opacity-high) * var(--opacity-multiplier));
     }
     100% {
         transform: translate3d(0, 0, 0) scale(var(--scale)) rotate(var(--rotate));
-        opacity: var(--opacity-low);
+        opacity: calc(var(--opacity-low) * var(--opacity-multiplier));
     }
 }
 
@@ -1018,6 +1027,8 @@ h1, h2, h3 {
 
 @media (max-width: 768px) {
     .floating-item {
+        display: block;
+        visibility: visible;
         width: 18px;
         height: 18px;
         max-width: 18px;
@@ -1025,10 +1036,7 @@ h1, h2, h3 {
         animation-duration: calc(var(--duration) * 1.6);
         --tx: 8px;
         --ty: -12px;
-    }
-
-    #floatingBg {
-        opacity: 0.6;
+        --opacity-multiplier: 2;
     }
 }
 

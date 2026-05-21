@@ -464,13 +464,13 @@ function setupFloatingBackground() {
 
   container.appendChild(fragment);
 
-  // Pause CSS animations while the menu section is scrolled off-screen
+  // Pause CSS animations while the floating background container is off-screen
   if ('IntersectionObserver' in window) {
     new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         container.classList.toggle('anim-paused', !entry.isIntersecting);
       });
-    }, { threshold: 0 }).observe(container.parentElement || container);
+    }, { threshold: 0 }).observe(container);
   }
 }
 
