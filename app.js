@@ -1,5 +1,5 @@
 /**
- * Pizza Hot - Interactive Menu Engine
+ * Ohio Pizza - Interactive Menu Engine
  * Built for a professional, premium experience.
  */
 
@@ -190,7 +190,7 @@ const menuData = [
     name_en: "Mixed Cold Meats",
     desc_ar: "صوص، جبنة، سلامي، بيبيروني، هوت دوغ، حبش مدخن",
     desc_en: "Sauce, Cheese, Salami, Pepperoni, Hot Dog, Smoked Turkey",
-    prices: { small: 850, medium: 1280, large: 1700 },
+    prices: { small: 850, medium: 1260, large: 1700 },
     image: "images/pizzas/لحومات باردة.jpg"
   },
 
@@ -381,10 +381,10 @@ let currentCategory = 'all';
 let categoryObserver = null;
 
 const categoryConfig = {
-  vegetables: { ar: "بيتزا الخضار", en: "Vegetables pizza" },
-  chicken: { ar: "بيتزا الدجاج", en: "Chicken pizza" },
-  hot_meats: { ar: "بيتزا اللحومات الساخنة", en: "Hot Meats pizza" },
-  cold_meats: { ar: "بيتزا اللحومات الباردة", en: "Cold Meats pizza" },
+  vegetables: { ar: "بيتزا الخضار", en: "Vegetables" },
+  chicken: { ar: "بيتزا الدجاج", en: "Chicken" },
+  hot_meats: { ar: "بيتزا اللحومات الساخنة", en: "Hot Meats" },
+  cold_meats: { ar: "بيتزا اللحومات الباردة", en: "Cold Meats" },
   choice: { ar: "بيتزا حسب الطلب", en: "Choice Pizza" },
   appetizers: { ar: "المقبلات", en: "Appetizers" },
   salads: { ar: "السلطات", en: "Salads" },
@@ -416,66 +416,61 @@ function init() {
 }
 
 /**
- * Restore 50 mushroom + 50 pepper floating background elements.
- * Uses DocumentFragment for a single DOM insertion.
- * CSS custom properties drive animation so media queries can override duration/name.
- * IntersectionObserver pauses all animations when the menu section is off-screen.
+ * Dynamically generate 50 mushroom + 50 pepper floating background elements.
+ * Animation driven entirely by CSS keyframes (transform + opacity only).
+ * IntersectionObserver pauses animation when the section is off-screen.
  */
 function setupFloatingBackground() {
   const container = document.getElementById('floatingBg');
   if (!container) return;
 
-  const MUSHROOM_COUNT = 50;
-  const PEPPER_COUNT = 50;
+  const COUNT_EACH = 50; // 50 mushrooms + 50 peppers = 100 total
   const fragment = document.createDocumentFragment();
 
-  function rnd(min, max) {
-    return min + Math.random() * (max - min);
-  }
-
-  function createVegItem(type) {
+  function createFloatingItem(type) {
     const img = document.createElement('img');
     img.src = `images/bg/${type}.png`;
-    img.alt = '';
     img.className = `floating-item ${type}`;
+    img.alt = '';
     img.setAttribute('aria-hidden', 'true');
-    img.loading = 'lazy';
-    img.decoding = 'async';
 
-    // Position — not animated, safe to set directly
-    img.style.top  = `${rnd(2, 94)}%`;
-    img.style.left = `${rnd(2, 94)}%`;
+    const top      = Math.random() * 100;
+    const left     = Math.random() * 100;
+    const duration = 18 + Math.random() * 22;          // 18s–40s
+    const delay    = -(Math.random() * 35);             // start mid-animation
+    const scale    = 0.6 + Math.random() * 0.8;        // 0.6–1.4
+    const rotate   = Math.round(Math.random() * 60 - 30);       // -30° to 30°
+    const rotateMid = rotate + Math.round(Math.random() * 20 - 10);
+    const opacityLow  = 0.04 + Math.random() * 0.08;            // 0.04–0.12
+    const opacityHigh = opacityLow + 0.05 + Math.random() * 0.10; // +0.05–0.15
 
-    // CSS custom properties set WITH their CSS units so var() works directly in
-    // keyframes and animation-duration — no calc(number * 1s) needed, which fails
-    // silently on iOS Safari and some Android WebView builds.
-    const dur = rnd(18, 36);
-    img.style.setProperty('--fi-dur',     `${dur.toFixed(1)}s`);
-    img.style.setProperty('--fi-dur-mob', `${(dur * 1.6).toFixed(1)}s`); // pre-computed; media query uses var(--fi-dur-mob)
-    img.style.setProperty('--fi-delay',   `${rnd(-30, 0).toFixed(1)}s`);
-    img.style.setProperty('--fi-scale',   rnd(0.65, 1.25).toFixed(2));          // dimensionless — no unit needed
-    img.style.setProperty('--fi-rot',     `${rnd(-50, 50).toFixed(1)}deg`);
-    img.style.setProperty('--fi-rot-mid', `${rnd(-70, 70).toFixed(1)}deg`);
-    img.style.setProperty('--fi-dx',      `${rnd(-25, 25).toFixed(1)}px`);
-    img.style.setProperty('--fi-dy',      `${rnd(-35, -10).toFixed(1)}px`);
+    img.style.top  = `${top.toFixed(2)}%`;
+    img.style.left = `${left.toFixed(2)}%`;
+    img.style.setProperty('--duration',     `${duration.toFixed(1)}s`);
+    img.style.setProperty('--delay',        `${delay.toFixed(1)}s`);
+    img.style.setProperty('--scale',        scale.toFixed(2));
+    img.style.setProperty('--rotate',       `${rotate}deg`);
+    img.style.setProperty('--rotate-mid',   `${rotateMid}deg`);
+    img.style.setProperty('--opacity-low',  opacityLow.toFixed(3));
+    img.style.setProperty('--opacity-high', opacityHigh.toFixed(3));
 
     return img;
   }
 
-  for (let i = 0; i < MUSHROOM_COUNT; i++) fragment.appendChild(createVegItem('mushroom'));
-  for (let i = 0; i < PEPPER_COUNT; i++)   fragment.appendChild(createVegItem('pepper'));
+  for (let i = 0; i < COUNT_EACH; i++) {
+    fragment.appendChild(createFloatingItem('mushroom'));
+    fragment.appendChild(createFloatingItem('pepper'));
+  }
 
   container.appendChild(fragment);
 
-  // Pause all animations when the menu section leaves the viewport —
-  // a single class toggle is far cheaper than iterating 100 elements.
-  if (typeof IntersectionObserver !== 'undefined') {
-    const menuSection = document.querySelector('.menu-section');
-    if (menuSection) {
-      new IntersectionObserver(entries => {
-        container.classList.toggle('paused', !entries[0].isIntersecting);
-      }, { threshold: 0 }).observe(menuSection);
-    }
+  // Pause CSS animations while the floating background container is off-screen
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        container.classList.toggle('anim-paused', !entry.isIntersecting);
+      });
+    }, { threshold: 0 }).observe(container);
   }
 }
 
@@ -609,11 +604,11 @@ window.openItemDetails = function (id) {
         <span class="modal-info-label">${currentLang === 'ar' ? 'نوع العجينة' : 'Crust Type'}</span>
         <div class="crust-selector">
             <button class="crust-btn active" onclick="selectCrust(this)">
-                <img src="images/pizzas/عجينة اورجينال.png" alt="${currentLang === 'ar' ? 'اورجينال' : 'Original'}" class="crust-img">
+                <img src="images/pizzas/عجينة اورجينال.png" alt="Original Crust" class="crust-img">
                 <span>${currentLang === 'ar' ? 'اورجينال' : 'Original'}</span>
             </button>
             <button class="crust-btn" onclick="selectCrust(this)">
-                <img src="images/pizzas/عجينة رقيقة.png" alt="${currentLang === 'ar' ? 'رقيقة' : 'Thin'}" class="crust-img">
+                <img src="images/pizzas/عجينة رقيقة.png" alt="Thin Crust" class="crust-img">
                 <span>${currentLang === 'ar' ? 'رقيقة' : 'Thin'}</span>
             </button>
         </div>
@@ -753,6 +748,13 @@ function updateStaticText() {
 function setupProScrollAnimation() {
   const container = document.querySelector('.pizza-scroll-container');
   const canvas = document.getElementById('pizzaCanvas');
+
+  // Halve canvas resolution on mobile — cuts frame memory from ~168MB to ~42MB
+  if (window.innerWidth < 768) {
+    canvas.width = 538;
+    canvas.height = 360;
+  }
+
   const ctx = canvas?.getContext('2d');
   const animationBox = document.getElementById('pizzaAnimationBox');
   const menuSection = document.querySelector('.menu-section');
@@ -821,42 +823,25 @@ function setupProScrollAnimation() {
     img.src = `${framePath}${frameNum}.jpg`;
   }
 
-  // 2. RAF loop state — stopped by default, woken by scroll
-  let rafId = null;
-  let loopActive = false;
+  // 2. Optimized Scroll Listener
+  let animationActive = false;
 
-  function startLoop() {
-    if (!loopActive) {
-      loopActive = true;
-      rafId = requestAnimationFrame(render);
-    }
-  }
-
-  // Scroll listener wakes the loop and updates progress
   window.addEventListener('scroll', () => {
     const rect = container.getBoundingClientRect();
     const progress = -rect.top / (rect.height - window.innerHeight);
     scrollProgress = Math.max(0, Math.min(1, progress));
-    startLoop();
+    // Wake the loop back up if it went idle
+    startAnimationLoop();
   }, { passive: true });
 
-  // Pause the loop entirely when the hero section leaves the viewport
-  if (typeof IntersectionObserver !== 'undefined') {
-    new IntersectionObserver(entries => {
-      if (!entries[0].isIntersecting && rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-        loopActive = false;
-      }
-    }, { threshold: 0 }).observe(container);
-  }
-
-  // 3. Render function — exits automatically once progress has settled
-  function render() {
-    const delta = scrollProgress - smoothedProgress;
-    smoothedProgress += delta * lerpFactor;
+  // 3. Smooth Animation Loop — pauses when converged, restarts on scroll
+  function doRender() {
+    const prevSmoothed = smoothedProgress;
+    smoothedProgress += (scrollProgress - smoothedProgress) * lerpFactor;
 
     const targetFrame = Math.round(smoothedProgress * (frameCount - 1));
+    const hasConverged = Math.abs(smoothedProgress - prevSmoothed) < 0.0002;
+
     if (targetFrame !== currentFrameIndex) {
       currentFrameIndex = targetFrame;
       const frame = frames[currentFrameIndex];
@@ -868,17 +853,17 @@ function setupProScrollAnimation() {
 
     updateUIStates(smoothedProgress);
 
-    if (Math.abs(delta) > 0.0005) {
-      rafId = requestAnimationFrame(render);
+    if (!hasConverged) {
+      requestAnimationFrame(doRender);
     } else {
-      loopActive = false;
-      rafId = null;
+      animationActive = false;
     }
   }
 
-  // 4. Start the loop after images finish loading
   function startAnimationLoop() {
-    startLoop();
+    if (animationActive) return;
+    animationActive = true;
+    requestAnimationFrame(doRender);
   }
 
   function updateUIStates(progress) {
@@ -972,9 +957,9 @@ function setupCategoryScrollSpy() {
  */
 const branchConfig = {
   malki: {
-    lat: 33.513412554802834,
-    lng: 36.274720239021704,
-    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6653.074670898194!2d36.274720239021704!3d33.513412554802834!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1518e74d1f8f9b4b%3A0xc0f494ee8cb65f84!2sPizza%20hot!5e0!3m2!1sen!2sin!4v1773497156508!5m2!1sen!2sin"
+    lat: 33.51586200005117,
+    lng: 36.27524959045903,
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2797.194125579921!2d36.27524959045903!3d33.51586200005117!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1518e74d1f8f9b4b%3A0xc0f494ee8cb65f84!2sPizza%20hot!5e0!3m2!1sen!2sin!4v1780812687217!5m2!1sen!2sin"
   },
   midan: {
     lat: 33.49325620921114,
